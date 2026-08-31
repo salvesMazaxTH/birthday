@@ -564,11 +564,9 @@
                 throw new Error(`Supabase error: ${response.statusText}`);
             }
 
-            if (response.status === 204) {
-                return [];
-            }
-
-            return response.json();
+            // POST/PATCH podem responder sem corpo (201/204). Só parseia se houver conteúdo.
+            const text = await response.text();
+            return text ? JSON.parse(text) : [];
         }
 
         // Carregar convidados do Supabase
