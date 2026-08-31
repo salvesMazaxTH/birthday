@@ -23,6 +23,7 @@
             --text-dark: #1a1a1a;
             --text-muted: #6B7280;
             --border: #E5E7EB;
+            --error: #DC2626;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -80,6 +81,34 @@
             font-weight: 500;
         }
 
+        .setup-message {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 2px solid var(--error);
+            text-align: center;
+        }
+
+        .setup-message h3 {
+            color: var(--error);
+            margin-bottom: 1rem;
+            font-family: "Poppins", sans-serif;
+        }
+
+        .setup-message p {
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .setup-message code {
+            background: var(--bg-light);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
         .form-section {
             background: var(--bg-white);
             border-radius: 12px;
@@ -123,6 +152,12 @@
             box-shadow: 0 0 0 3px rgba(233, 75, 138, 0.1);
         }
 
+        input[type="text"]:disabled,
+        select:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         input[type="text"]::placeholder {
             color: var(--text-muted);
         }
@@ -164,6 +199,11 @@
             font-weight: 700;
         }
 
+        input[type="radio"]:disabled + .radio-label {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .confirm-label {
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -186,13 +226,18 @@
             letter-spacing: 0.5px;
         }
 
-        button:hover {
+        button:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 8px 16px rgba(233, 75, 138, 0.3);
         }
 
-        button:active {
+        button:active:not(:disabled) {
             transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .summary-section {
@@ -267,10 +312,22 @@
             align-items: center;
             padding: 0.75rem 0;
             border-bottom: 1px solid var(--border);
+            animation: slideIn 0.3s ease;
         }
 
         .guest-item:last-child {
             border-bottom: none;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .guest-name {
@@ -306,14 +363,27 @@
             bottom: 2rem;
             left: 1rem;
             right: 1rem;
-            background: var(--success);
-            color: white;
             padding: 1rem;
             border-radius: 8px;
             font-weight: 600;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 1000;
             animation: slideUp 0.3s ease;
+        }
+
+        .toast.success {
+            background: var(--success);
+            color: white;
+        }
+
+        .toast.error {
+            background: var(--error);
+            color: white;
+        }
+
+        .toast.info {
+            background: var(--primary);
+            color: white;
         }
 
         @keyframes slideUp {
@@ -325,6 +395,26 @@
                 transform: translateY(0);
                 opacity: 1;
             }
+        }
+
+        .sync-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            margin-left: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        .sync-indicator.loading {
+            background: var(--primary);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         @media (max-width: 600px) {
@@ -361,6 +451,14 @@
             <p class="subtitle">Confirme sua presença no meu aniversário</p>
         </header>
 
+        <div id="setupMessage" class="setup-message" style="display: none;">
+            <h3>⚠️ Configuração necessária</h3>
+            <p>Para funcionar, você precisa configurar o Supabase:</p>
+            <p>1. Crie um projeto em <strong>supabase.com</strong></p>
+            <p>2. Copie a <strong>Project URL</strong> e <strong>anon key</strong> nas configurações</p>
+            <p>3. Edite este arquivo HTML e procure por <code>SUPABASE_URL</code> e <code>SUPABASE_KEY</code></p>
+        </div>
+
         <div class="form-section">
             <form id="confirmationForm">
                 <div class="form-group">
@@ -393,7 +491,7 @@
         </div>
 
         <div class="summary-section">
-            <h2 class="summary-title">Confirmações</h2>
+            <h2 class="summary-title">Confirmações <span id="syncIndicator" class="sync-indicator loading"></span></h2>
 
             <div class="summary-cards">
                 <div class="summary-card yes">
@@ -408,22 +506,121 @@
 
             <div class="guests-list">
                 <div class="guests-title">Respostas recebidas</div>
-                <div id="guestsList" class="empty-state">Nenhuma resposta ainda. Seja o primeiro a confirmar! 🎊</div>
+                <div id="guestsList" class="empty-state">Carregando respostas... ⏳</div>
             </div>
         </div>
     </div>
 
     <script>
-        // Initialize data from localStorage or use empty array
-        let guests = JSON.parse(localStorage.getItem('birthdayGuests')) || [];
+        // ⚠️ CONFIGURE SEUS DADOS DO SUPABASE AQUI ⚠️
+        const SUPABASE_URL = 'https://seu-projeto.supabase.co';  // Substitua com sua Project URL
+        const SUPABASE_KEY = 'sua-anon-key-aqui';                // Substitua com sua anon key
+
+        // ================================================================
+
+        let guests = [];
+        let isConfigured = false;
+        let syncInProgress = false;
 
         const form = document.getElementById('confirmationForm');
         const nameInput = document.getElementById('name');
         const guestsList = document.getElementById('guestsList');
         const yesCount = document.getElementById('yesCount');
         const noCount = document.getElementById('noCount');
+        const setupMessage = document.getElementById('setupMessage');
+        const syncIndicator = document.getElementById('syncIndicator');
 
-        // Render the current state
+        // Verificar se Supabase está configurado
+        function checkConfiguration() {
+            if (!SUPABASE_URL.includes('supabase.co') || SUPABASE_KEY === 'sua-anon-key-aqui') {
+                setupMessage.style.display = 'block';
+                form.style.display = 'none';
+                disableForm();
+                return false;
+            }
+            isConfigured = true;
+            setupMessage.style.display = 'none';
+            return true;
+        }
+
+        // Fetch com header do Supabase
+        async function supabaseCall(method, path, body = null) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                }
+            };
+
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            const response = await fetch(`${SUPABASE_URL}/rest/v1${path}`, options);
+
+            if (!response.ok) {
+                throw new Error(`Supabase error: ${response.statusText}`);
+            }
+
+            return response.json();
+        }
+
+        // Carregar convidados do Supabase
+        async function loadGuests() {
+            if (!isConfigured) return;
+
+            try {
+                setSyncIndicator('loading');
+                const data = await supabaseCall('GET', '/birthday_guests?order=created_at.asc');
+                guests = data;
+                render();
+                setSyncIndicator('synced');
+            } catch (error) {
+                console.error('Erro ao carregar convidados:', error);
+                showToast('Erro ao carregar dados do servidor', 'error');
+                setSyncIndicator('error');
+            }
+        }
+
+        // Adicionar ou atualizar convidado
+        async function saveGuest(name, presence) {
+            if (!isConfigured) return false;
+
+            try {
+                setSyncIndicator('loading');
+                const existingGuest = guests.find(g => g.name.toLowerCase() === name.toLowerCase());
+
+                if (existingGuest) {
+                    // Atualizar
+                    await supabaseCall(
+                        'PATCH',
+                        `/birthday_guests?name=eq.${encodeURIComponent(name)}`,
+                        { presence }
+                    );
+                } else {
+                    // Inserir
+                    await supabaseCall(
+                        'POST',
+                        '/birthday_guests',
+                        { name, presence }
+                    );
+                }
+
+                // Recarregar dados
+                await loadGuests();
+                setSyncIndicator('synced');
+                return true;
+            } catch (error) {
+                console.error('Erro ao salvar:', error);
+                showToast('Erro ao confirmar presença', 'error');
+                setSyncIndicator('error');
+                return false;
+            }
+        }
+
+        // Atualizar UI
         function render() {
             updateCounts();
             renderGuestsList();
@@ -463,9 +660,9 @@
             return text.replace(/[&<>"']/g, m => map[m]);
         }
 
-        function showToast(message) {
+        function showToast(message, type = 'success') {
             const toast = document.createElement('div');
-            toast.className = 'toast';
+            toast.className = `toast ${type}`;
             toast.textContent = message;
             document.body.appendChild(toast);
 
@@ -474,44 +671,65 @@
             }, 3000);
         }
 
-        form.addEventListener('submit', (e) => {
+        function disableForm() {
+            document.getElementById('name').disabled = true;
+            document.getElementById('yes').disabled = true;
+            document.getElementById('no').disabled = true;
+            document.querySelector('button').disabled = true;
+        }
+
+        function setSyncIndicator(state) {
+            if (state === 'loading') {
+                syncIndicator.classList.add('loading');
+            } else if (state === 'synced') {
+                syncIndicator.classList.remove('loading');
+            } else if (state === 'error') {
+                syncIndicator.classList.remove('loading');
+            }
+        }
+
+        // Event listeners
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const name = nameInput.value.trim();
             const presence = document.querySelector('input[name="presence"]:checked').value;
 
             if (!name) {
-                showToast('Por favor, digite seu nome');
+                showToast('Por favor, digite seu nome', 'error');
                 return;
             }
 
-            // Check if guest already exists
-            const existingIndex = guests.findIndex(g => g.name.toLowerCase() === name.toLowerCase());
+            if (syncInProgress) return;
+            syncInProgress = true;
+            document.querySelector('button').disabled = true;
 
-            if (existingIndex !== -1) {
-                // Update existing guest
-                guests[existingIndex].presence = presence;
-            } else {
-                // Add new guest
-                guests.push({ name, presence });
+            const success = await saveGuest(name, presence);
+
+            if (success) {
+                form.reset();
+                nameInput.focus();
+                showToast('Presença confirmada com sucesso! 🎉', 'success');
             }
 
-            // Save to localStorage
-            localStorage.setItem('birthdayGuests', JSON.stringify(guests));
-
-            // Reset form
-            form.reset();
-            nameInput.focus();
-
-            // Update UI
-            render();
-
-            // Show success message
-            showToast('Presença confirmada com sucesso! 🎉');
+            syncInProgress = false;
+            document.querySelector('button').disabled = false;
         });
 
-        // Initial render
-        render();
+        // Inicializar
+        async function init() {
+            if (!checkConfiguration()) {
+                showToast('Configure o Supabase primeiro', 'error');
+                return;
+            }
+
+            await loadGuests();
+
+            // Recarregar a cada 5 segundos para sincronização em tempo real (alternativa a WebSockets)
+            setInterval(loadGuests, 5000);
+        }
+
+        init();
     </script>
 </body>
 </html>
