@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Você vai estar lá?</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&display=swap">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #E94B8A;
+            --primary-light: #F2B1D0;
+            --secondary: #7B68EE;
+            --accent: #FFD60A;
+            --success: #06A77D;
+            --bg-light: #F5F5F5;
+            --bg-white: #FFFFFF;
+            --text-dark: #1a1a1a;
+            --text-muted: #6B7280;
+            --border: #E5E7EB;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg-light: #1F2937;
+                --bg-white: #111827;
+                --text-dark: #F3F4F6;
+                --text-muted: #D1D5DB;
+                --border: #374151;
+                --primary-light: #A61E6E;
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --bg-light: #1F2937;
+            --bg-white: #111827;
+            --text-dark: #F3F4F6;
+            --text-muted: #D1D5DB;
+            --border: #374151;
+            --primary-light: #A61E6E;
+        }
+
+        body {
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        h1 {
+            font-family: "Poppins", sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            text-wrap: balance;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .form-section {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: "Poppins", sans-serif;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: "Inter", sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(233, 75, 138, 0.1);
+        }
+
+        input[type="text"]::placeholder {
+            color: var(--text-muted);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.75rem;
+        }
+
+        .radio-option {
+            flex: 1;
+        }
+
+        input[type="radio"] {
+            display: none;
+        }
+
+        .radio-label {
+            display: block;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            user-select: none;
+            font-family: "Poppins", sans-serif;
+            font-size: 0.95rem;
+            background: var(--bg-light);
+            color: var(--text-dark);
+        }
+
+        input[type="radio"]:checked + .radio-label {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--text-dark);
+            font-weight: 700;
+        }
+
+        .confirm-label {
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: "Poppins", sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(233, 75, 138, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .summary-section {
+            margin-top: 3rem;
+        }
+
+        .summary-title {
+            font-family: "Poppins", sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            text-wrap: balance;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: var(--bg-white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .summary-card.yes {
+            border-left: 4px solid var(--success);
+        }
+
+        .summary-card.no {
+            border-left: 4px solid var(--text-muted);
+        }
+
+        .summary-count {
+            font-family: "Poppins", sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .guests-list {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .guests-title {
+            font-family: "Poppins", sans-serif;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .guest-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .guest-item:last-child {
+            border-bottom: none;
+        }
+
+        .guest-name {
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .guest-status {
+            font-family: "Poppins", sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-yes {
+            color: var(--success);
+        }
+
+        .status-no {
+            color: var(--text-muted);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 2rem 0;
+            font-style: italic;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 1rem;
+            right: 1rem;
+            background: var(--success);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(120%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 1.5rem 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .form-section {
+                padding: 1.5rem;
+            }
+
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Você vai estar lá? 🎉</h1>
+            <p class="subtitle">Confirme sua presença no meu aniversário</p>
+        </header>
+
+        <div class="form-section">
+            <form id="confirmationForm">
+                <div class="form-group">
+                    <label for="name">Seu Nome</label>
+                    <input
+                        type="text"
+                        id="name"
+                        placeholder="Digite seu nome"
+                        required
+                        autocomplete="off"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="confirm-label">Você confirma sua presença?</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="yes" name="presence" value="yes" required>
+                            <label for="yes" class="radio-label">✓ Vou estar lá!</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="no" name="presence" value="no">
+                            <label for="no" class="radio-label">✗ Não posso ir</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit">Confirmar Presença</button>
+            </form>
+        </div>
+
+        <div class="summary-section">
+            <h2 class="summary-title">Confirmações</h2>
+
+            <div class="summary-cards">
+                <div class="summary-card yes">
+                    <div class="summary-count" id="yesCount">0</div>
+                    <div class="summary-label">Confirmados</div>
+                </div>
+                <div class="summary-card no">
+                    <div class="summary-count" id="noCount">0</div>
+                    <div class="summary-label">Não podem ir</div>
+                </div>
+            </div>
+
+            <div class="guests-list">
+                <div class="guests-title">Respostas recebidas</div>
+                <div id="guestsList" class="empty-state">Nenhuma resposta ainda. Seja o primeiro a confirmar! 🎊</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize data from localStorage or use empty array
+        let guests = JSON.parse(localStorage.getItem('birthdayGuests')) || [];
+
+        const form = document.getElementById('confirmationForm');
+        const nameInput = document.getElementById('name');
+        const guestsList = document.getElementById('guestsList');
+        const yesCount = document.getElementById('yesCount');
+        const noCount = document.getElementById('noCount');
+
+        // Render the current state
+        function render() {
+            updateCounts();
+            renderGuestsList();
+        }
+
+        function updateCounts() {
+            const confirmedYes = guests.filter(g => g.presence === 'yes').length;
+            const confirmedNo = guests.filter(g => g.presence === 'no').length;
+            yesCount.textContent = confirmedYes;
+            noCount.textContent = confirmedNo;
+        }
+
+        function renderGuestsList() {
+            if (guests.length === 0) {
+                guestsList.innerHTML = '<div class="empty-state">Nenhuma resposta ainda. Seja o primeiro a confirmar! 🎊</div>';
+                return;
+            }
+
+            guestsList.innerHTML = guests.map(guest => `
+                <div class="guest-item">
+                    <span class="guest-name">${escapeHtml(guest.name)}</span>
+                    <span class="guest-status ${guest.presence === 'yes' ? 'status-yes' : 'status-no'}">
+                        ${guest.presence === 'yes' ? '✓ Confirmado' : '✗ Não pode ir'}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const name = nameInput.value.trim();
+            const presence = document.querySelector('input[name="presence"]:checked').value;
+
+            if (!name) {
+                showToast('Por favor, digite seu nome');
+                return;
+            }
+
+            // Check if guest already exists
+            const existingIndex = guests.findIndex(g => g.name.toLowerCase() === name.toLowerCase());
+
+            if (existingIndex !== -1) {
+                // Update existing guest
+                guests[existingIndex].presence = presence;
+            } else {
+                // Add new guest
+                guests.push({ name, presence });
+            }
+
+            // Save to localStorage
+            localStorage.setItem('birthdayGuests', JSON.stringify(guests));
+
+            // Reset form
+            form.reset();
+            nameInput.focus();
+
+            // Update UI
+            render();
+
+            // Show success message
+            showToast('Presença confirmada com sucesso! 🎉');
+        });
+
+        // Initial render
+        render();
+    </script>
+</body>
+</html>
